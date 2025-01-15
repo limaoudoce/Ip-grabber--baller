@@ -1,0 +1,59 @@
+// Função para obter o IP IPv4 do usuário
+async function getUserIP() {
+    try {
+      const response = await fetch('https://api.ipify.org?format=json'); // Obter IPv4
+      const data = await response.json();
+      return data.ip;
+    } catch (error) {
+      console.error('Erro ao obter IP:', error);
+      return 'IP não identificado';
+    }
+  }
+  
+  // Função para identificar o sistema operacional do usuário
+  function getOperatingSystem() {
+    const userAgent = navigator.userAgent.toLowerCase();
+  
+    if (userAgent.includes('windows')) return 'Windows';
+    if (userAgent.includes('mac')) return 'MacOS';
+    if (userAgent.includes('linux')) return 'Linux';
+    if (userAgent.includes('android')) return 'Android';
+    if (userAgent.includes('iphone') || userAgent.includes('ipad')) return 'iOS';
+  
+    return 'Sistema operacional desconhecido';
+  }
+  
+  // Salvar IP, sistema operacional e horário no localStorage
+  async function saveIP() {
+    const ip = await getUserIP();
+    const os = getOperatingSystem();
+  
+    let ipList = JSON.parse(localStorage.getItem('ipList')) || [];
+    ipList.push({ ip, os, timestamp: new Date().toLocaleString() });
+    localStorage.setItem('ipList', JSON.stringify(ipList));
+  }
+  
+  // Mostrar a lista de IPs e sistemas operacionais na página `list.html`
+  function displayIPs() {
+    const ipList = JSON.parse(localStorage.getItem('ipList')) || [];
+    const ul = document.getElementById('ipList');
+  
+    ipList.forEach(entry => {
+      const li = document.createElement('li');
+      li.textContent = `${entry.ip} (${entry.os}) - ${entry.timestamp}`;
+      ul.appendChild(li);
+    });
+  }
+  
+  // Executar a função correspondente com base na página
+  (async function () {
+    if (document.body.classList.contains('blank')) {
+      // Salvar IP e redirecionar na página em branco
+      await saveIP();
+      window.location.href = 'https://www.youtube.com/'; // Substitua pelo site desejado
+    } else if (document.body.contains(document.getElementById('ipList'))) {
+      // Exibir a lista de IPs na página `list.html`
+      displayIPs();
+    }
+  })();
+  
